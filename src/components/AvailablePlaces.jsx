@@ -1,24 +1,49 @@
 import { useEffect, useState } from 'react';
 import Places from './Places.jsx';
+import Error from './Error.jsx'
+import { sortPlacesByDistance } from '../loc.js'
+import { fetchAvailablePlaces } from '../http.js'
 
-const places = localStorage.getItem('places')
+
 
 export default function AvailablePlaces({ onSelectPlace }) {
   const [isFetching, setIsFetching] = useState(false)
   const [AvailablePlaces, setAvailablePlaces] = useState([])
+  const [error, setError] = useState()
   useEffect(() => {
 
     async function featchPlaces() {
       setIsFetching(true)
-      const resposen = await fetch('http://localhost:3000/places')
-      const resData = await resposen.json()
-      setAvailablePlaces(resData.places)
-      setIsFetching(false)
+
+      try {
+        const places = await fetchAvailablePlaces()
+
+        navigator.geolocation.getCurrentPosition((position) => {
+          console.log(position)
+          const sortedPlaces = sortPlacesByDistance(places, position.coords.latitude, position.coords.longitude)
+          setAvailablePlaces(sortedPlaces)
+          setIsFetching(false)
+        })
+
+
+      } catch (error) {
+
+        setError(({
+          message: error.message || 'Could not getch places, please try again later',
+        }))
+
+        setIsFetching(false)
+      }
+
+
     }
 
     featchPlaces()
 
   }, [])
+
+
+  if (error) return <Error title="An error Occurred" message={error.message} />
 
 
 
