@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 
-function useFetch(fetchFn, initiaValue) {
+export function useFetch(fetchFn, initiaValue) {
   const [isFetching, setIsFetching] = useState();
   const [error, setError] = useState();
   const [fetchedData, setFetchedData] = useState(initiaValue);
@@ -10,7 +10,7 @@ function useFetch(fetchFn, initiaValue) {
       setIsFetching(true);
       try {
         const data = await fetchFn();
-        setUserPlaces(data);
+        setFetchedData(data);
       } catch (error) {
         setError({ message: error.message || "Failed to fetch user places." });
       }
@@ -23,6 +23,7 @@ function useFetch(fetchFn, initiaValue) {
   return {
     isFetching,
     fetchedData,
+    setFetchedData,
     error,
   };
 }
